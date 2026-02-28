@@ -1,0 +1,15 @@
+{
+  "name": "mediintake",
+  "version": "1.0.0",
+  "description": "Digital Healthcare Intake System — React + Express + MongoDB",
+  "scripts": {
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "seed": "cd backend && node seed.js",
+    "backend": "cd backend && npm run dev",
+    "frontend": "cd frontend && npm start",
+    "start": "concurrently \"npm run backend\" \"npm run frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
