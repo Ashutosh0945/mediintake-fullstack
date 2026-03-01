@@ -10,8 +10,10 @@ const app = express();
 // ── Middleware ──────────────────────────────────────────────
 app.use(cors({
   origin: [
-    'http://localhost:3000',
-    'https://mediintake1.vercel.app'
+    "http://localhost:3000",
+    "https://mediintake1.vercel.app",
+    "https://mediintake1-git-main.vercel.app",
+    "https://mediintake1-ashutosh0945.vercel.app"
   ],
   credentials: true
 }));
