@@ -1,10 +1,21 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import NotificationBell from './NotificationBell';
+import { useTheme } from '../hooks/useTheme';
 
-export default function Layout({ navItems, children, userName, userRole, avatarText, accentColor = 'var(--accent)' }) {
+export default function Layout({
+  navItems,
+  children,
+  userName,
+  userRole,
+  avatarText,
+  accentColor = 'var(--accent)',
+  showBell = false
+}) {
   const { logout } = useAuth();
   const navigate   = useNavigate();
+  const { theme, toggle } = useTheme();
 
   const handleLogout = () => { logout(); navigate('/'); };
 
@@ -28,7 +39,7 @@ export default function Layout({ navItems, children, userName, userRole, avatarT
         <div style={{ padding: '16px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{
             width: 38, height: 38, borderRadius: '50%',
-            background: `linear-gradient(135deg, ${accentColor}, var(--teal))`,
+            background: 'linear-gradient(135deg,' + accentColor + ', var(--teal))',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontWeight: 700, fontSize: '0.85rem', color: '#fff', flexShrink: 0
           }}>{avatarText}</div>
@@ -69,8 +80,26 @@ export default function Layout({ navItems, children, userName, userRole, avatarT
           ))}
         </nav>
 
-        {/* Sign Out */}
+        {/* Footer buttons */}
         <div style={{ padding: '12px 10px', borderTop: '1px solid var(--border)' }}>
+
+          {/* Theme Toggle */}
+          <button
+            onClick={toggle}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 9,
+              padding: '9px 12px', borderRadius: 8, border: 'none',
+              background: 'transparent', color: 'var(--text3)', cursor: 'pointer',
+              fontSize: '0.875rem', width: '100%', transition: 'all 0.15s', marginBottom: 2
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface)'; e.currentTarget.style.color = 'var(--text)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text3)'; }}
+          >
+            <span style={{ width: 18, textAlign: 'center' }}>{theme === 'dark' ? '☀️' : '🌙'}</span>
+            {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+          </button>
+
+          {/* Sign Out */}
           <button
             onClick={handleLogout}
             style={{
@@ -88,14 +117,16 @@ export default function Layout({ navItems, children, userName, userRole, avatarT
       </aside>
 
       {/* ── MAIN CONTENT ── */}
-<main style={{ padding: '32px 40px', overflowY: 'auto', background: 'var(--bg)' }}>
-  {showBell && (
-    <div style={{ position: 'fixed', top: 18, right: 24, zIndex: 100 }}>
-      <NotificationBell />
-    </div>
-  )}
-  {children}
-</main>
+      <main style={{ padding: '32px 40px', overflowY: 'auto', background: 'var(--bg)', position: 'relative' }}>
+        {/* Notification Bell — only for hospital staff */}
+        {showBell && (
+          <div style={{ position: 'fixed', top: 18, right: 24, zIndex: 100 }}>
+            <NotificationBell />
+          </div>
+        )}
+        {children}
+      </main>
+
     </div>
   );
 }
