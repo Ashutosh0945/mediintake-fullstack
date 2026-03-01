@@ -8,36 +8,48 @@ dotenv.config();
 const app = express();
 
 
-// ── CORS CONFIG (FIXED) ─────────────────────────────────────
+// ── CORS CONFIG (BEST VERSION) ─────────────────────────────
 const corsOptions = {
-  origin: [
-    "http://localhost:3000",
-    "https://mediintake1.vercel.app",
-    "https://mediintake1-git-main.vercel.app",
-    "https://mediintake1-ashutosh0945.vercel.app"
-  ],
+  origin: function (origin, callback) {
+
+    const allowedOrigins = [
+      "http://localhost:3000",
+      "https://mediintake1.vercel.app",
+      "https://mediintake1-git-main.vercel.app",
+      "https://mediintake1-ashutosh0945.vercel.app"
+    ];
+
+    // allow requests with no origin (mobile apps / curl)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(null, true); // allow all for now
+    }
+  },
   methods: ["GET","POST","PUT","DELETE","OPTIONS"],
   allowedHeaders: ["Content-Type","Authorization"],
   credentials: true
 };
 
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // IMPORTANT for preflight
+app.options('*', cors(corsOptions)); // important for preflight
 
 
-// ── Body Parser ─────────────────────────────────────────────
+// ── BODY PARSER ────────────────────────────────────────────
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
-// ── Routes ──────────────────────────────────────────────────
-app.use('/api/auth',     require('./routes/auth'));
+// ── ROUTES ─────────────────────────────────────────────────
+app.use('/api/auth', require('./routes/auth'));
 app.use('/api/patients', require('./routes/patients'));
-app.use('/api/intakes',  require('./routes/intakes'));
+app.use('/api/intakes', require('./routes/intakes'));
 app.use('/api/hospital', require('./routes/hospital'));
 
 
-// ── Health Check ────────────────────────────────────────────
+// ── HEALTH CHECK ───────────────────────────────────────────
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
@@ -47,7 +59,13 @@ app.get('/api/health', (req, res) => {
 });
 
 
-// ── 404 Handler ─────────────────────────────────────────────
+// ── ROOT TEST (helps debugging) ─────────────────────────────
+app.get('/', (req, res) => {
+  res.send("MediIntake Backend Running 🚀");
+});
+
+
+// ── 404 HANDLER ─────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -56,7 +74,7 @@ app.use((req, res) => {
 });
 
 
-// ── Global Error Handler ────────────────────────────────────
+// ── GLOBAL ERROR HANDLER ───────────────────────────────────
 app.use((err, req, res, next) => {
   console.error(err.stack);
 
@@ -67,12 +85,13 @@ app.use((err, req, res, next) => {
 });
 
 
-// ── DB + Start ──────────────────────────────────────────────
+// ── DATABASE + SERVER START ────────────────────────────────
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/mediintake';
+const MONGO_URI = process.env.MONGO_URI;
 
 mongoose.connect(MONGO_URI)
   .then(() => {
+
     console.log('✅ MongoDB connected');
 
     app.listen(PORT, () => {
@@ -81,6 +100,8 @@ mongoose.connect(MONGO_URI)
 
   })
   .catch(err => {
+
     console.error('❌ MongoDB connection failed:', err.message);
     process.exit(1);
+
   });
